@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Teams Dashboard</title>
+		<style>
+			body {
+				background-color: #000;
+				font-family: verdana, arial, sans-serif;
+				font-size: 12px;
+				color: #fff;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				margin: 0;
+				height: 100vh;
+      }
+      
+      h1 {
+        position: absolute;
+        left: 20px;
+        top: 20px;
+      }
+			
+			#dash {
+        flex: 1;
+        display: flex;
+        margin: 20px;
+      }
+      
+      .dash-item {
+        flex: 1;
+        margin-right: 20px;
+        border: 1px solid #666;
+        padding: 20px;
+      }
+
+      .dash-item:last-child {
+        margin: 0;
+      }
+
+      .data-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      label {
+        color: #aaa;
+      }
+		</style>
+	</head>
+	<body>
+    <h1>Teams Dashboard</h1>
+    <div id="dash"></div>
+	  <script>
+      const teams = [
+        'new_york_jets',
+        'buffalo_bills',
+        'tampa_bay_buccaneers'
+      ];
+
+			(function(teamList) {
+        const DATA_URL = 'https://www.thesportsdb.com/api/v1/json/1/searchteams.php?t=';
+        const list = [];
+
+        function dashTpl(data) {
+          return `<div class="dash-item">
+            <h2>${data.strTeam}</h2>
+            <ul class="data-list">
+              <li><label>Stadium</label> ${data.strStadium}</li>
+              <li><label>Location</label> ${data.strStadiumLocation}</li>
+              <li><label>Manager</label> ${data.strManager}</li>
+            </ul>
+          </div>`;
+        }
+
+        function genMarkup() {
+          let tpl = '';
+
+          list.forEach(item => {
+            tpl = `${tpl}${dashTpl(item)}`;
+          });
+
+          return tpl;
+        }
+
+        async function getData() {
+          for (team of teamList) {
+            const res = await fetch(`${DATA_URL}${team}`);
+            const data = await res.json();
+
+            if (data?.teams?.length) {
+              list.push(data.teams[0]);
+            }
+          }
+
+          return Promise.resolve();
+        }
+
+				async function init() {
+          console.log('started...');
+          await getData();
+          document.getElementById('dash').innerHTML = genMarkup();
+				}
+				
+				return {
+					init
+				};
+			})(teams).init();
+    </script>
+  </body>
+</html>
